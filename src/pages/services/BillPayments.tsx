@@ -21,7 +21,12 @@ const BillPayments: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment processing
+    // Simulate payment processing with validation
+    if (!formData.billNo || !formData.amount || !formData.paymentType) {
+      setIsProcessing(false);
+      return;
+    }
+    
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     setIsProcessing(false);
