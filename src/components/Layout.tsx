@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Zap, Home, Settings, MessageSquare, Info, Star } from 'lucide-react';
+import { Zap, Home, Settings, MessageSquare, Info, Star, LogOut, User } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,9 +8,18 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userName = localStorage.getItem('userName') || 'User';
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    window.location.href = '/';
   };
 
   return (
