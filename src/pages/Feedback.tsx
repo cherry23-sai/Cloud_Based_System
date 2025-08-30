@@ -25,6 +25,16 @@ const Feedback: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Store feedback in localStorage for admin to view
+    const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+    const newFeedback = {
+      ...formData,
+      createdAt: new Date().toISOString(),
+      id: Date.now().toString()
+    };
+    feedbacks.push(newFeedback);
+    localStorage.setItem('userFeedbacks', JSON.stringify(feedbacks));
+    
     // Show animation
     setShowAnimation(true);
     

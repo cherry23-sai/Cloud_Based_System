@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
-import { Mail, Phone, User, Calendar, MapPin, Zap, Droplets, Eye, EyeOff } from 'lucide-react';
+import { Mail, Phone, User, Calendar, MapPin, Zap, Droplets, Eye, EyeOff, Loader } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginRegister: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [otpSent, setOtpSent] = useState({ mobile: false, email: false });
+  
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
+
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     dob: '',
@@ -18,8 +32,60 @@ const LoginRegister: React.FC = () => {
     emailOtp: ''
   });
 
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginData({ ...loginData, [e.target.name]: e.target.value });
+    setError('');
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    const success = await login(loginData.email, loginData.password);
+    
+    if (success) {
+      navigate('/services');
+    } else {
+      setError('Invalid email or password. Please try again.');
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    const success = await register(formData);
+    
+    if (success) {
+      navigate('/services');
+    } else {
+      setError('Registration failed. Please try again.');
+    }
+    
+    setIsLoading(false);
+  };
+
+  const sendOtp = (type: 'mobile' | 'email') => {
+    // Simulate OTP sending
+    setOtpSent({ ...otpSent, [type]: true });
+    
+    // Auto-fill OTP for demo
+    setTimeout(() => {
+      if (type === 'mobile') {
+        setFormData({ ...formData, mobileOtp: '123456' });
+      } else {
+        setFormData({ ...formData, emailOtp: '654321' });
+      }
+    }, 1000);
   };
 
   const nextStep = () => setStep(step + 1);
@@ -120,9 +186,10 @@ const LoginRegister: React.FC = () => {
                 />
                 <button
                   type="button"
+                  onClick={() => sendOtp('mobile')}
                   className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm"
                 >
-                  Send OTP
+                  {otpSent.mobile ? 'Sent ✓' : 'Send OTP'}
                 </button>
               </div>
             </div>
@@ -151,9 +218,10 @@ const LoginRegister: React.FC = () => {
                 />
                 <button
                   type="button"
+                  onClick={() => sendOtp('email')}
                   className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm"
                 >
-                  Send OTP
+                  {otpSent.email ? 'Sent ✓' : 'Send OTP'}
                 </button>
               </div>
             </div>
@@ -242,10 +310,17 @@ const LoginRegister: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                disabled={!formData.waterMeterNo || !formData.electricityMeterNo || !formData.password}
+                disabled={isLoading || !formData.waterMeterNo || !formData.electricityMeterNo || !formData.password}
+                className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center"
               >
-                Complete Registration
+                {isLoading ? (
+                  <>
+                    <Loader className="animate-spin h-5 w-5 mr-2" />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Complete Registration'
+                )}
               </button>
             </div>
           </div>
@@ -264,8 +339,12 @@ const LoginRegister: React.FC = () => {
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
+            name="email"
+            value={loginData.email}
+            onChange={handleLoginChange}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your email or mobile number"
+            required
           />
         </div>
       </div>
@@ -274,8 +353,12 @@ const LoginRegister: React.FC = () => {
         <div className="relative">
           <input
             type={showPassword ? 'text' : 'password'}
+            name="password"
+            value={loginData.password}
+            onChange={handleLoginChange}
             className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your password"
+            required
           />
           <button
             type="button"
@@ -293,12 +376,33 @@ const LoginRegister: React.FC = () => {
         </div>
         <a href="#" className="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
       </div>
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+      
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        disabled={isLoading || !loginData.email || !loginData.password}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center"
       >
-        Sign In
+        {isLoading ? (
+          <>
+            <Loader className="animate-spin h-5 w-5 mr-2" />
+            Signing In...
+          </>
+        ) : (
+          'Sign In'
+        )}
       </button>
+      
+      <div className="text-center text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+        <strong>Demo Credentials:</strong><br />
+        Admin: admin@smartutility.com / admin123<br />
+        User: Any email with any password
+      </div>
     </div>
   );
 
@@ -319,7 +423,7 @@ const LoginRegister: React.FC = () => {
 
         <div className="flex mb-8 bg-gray-100 rounded-lg p-1">
           <button
-            onClick={() => { setIsLogin(true); setStep(1); }}
+            onClick={() => { setIsLogin(true); setStep(1); setError(''); }}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
               isLogin 
                 ? 'bg-white text-blue-600 shadow-sm' 
@@ -329,7 +433,7 @@ const LoginRegister: React.FC = () => {
             Sign In
           </button>
           <button
-            onClick={() => { setIsLogin(false); setStep(1); }}
+            onClick={() => { setIsLogin(false); setStep(1); setError(''); }}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
               !isLogin 
                 ? 'bg-white text-blue-600 shadow-sm' 
@@ -354,14 +458,14 @@ const LoginRegister: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={isLogin ? handleLogin : handleRegister}>
           {isLogin ? renderLogin() : renderRegistrationStep()}
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-600">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button
-            onClick={() => { setIsLogin(!isLogin); setStep(1); }}
+            onClick={() => { setIsLogin(!isLogin); setStep(1); setError(''); }}
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
             {isLogin ? 'Sign up' : 'Sign in'}
