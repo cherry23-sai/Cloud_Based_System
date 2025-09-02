@@ -400,8 +400,11 @@ const LoginRegister: React.FC = () => {
       
       <div className="text-center text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
         <strong>Demo Credentials:</strong><br />
-        Admin: admin@smartutility.com / admin123<br />
-        User: Any email with any password
+        <strong>Admin:</strong> admin@smartutility.com / admin123<br />
+        <strong>Users:</strong><br />
+        rajesh.kumar@email.com / user123<br />
+        priya.sharma@email.com / user123<br />
+        amit.patel@email.com / user123
       </div>
     </div>
   );

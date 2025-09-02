@@ -35,8 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // For demo purposes, we'll use localStorage
-      // In production, this would authenticate with Supabase
+      // Demo users
+      const demoUsers = [
+        { email: 'admin@smartutility.com', password: 'admin123', isAdmin: true },
+        { email: 'rajesh.kumar@email.com', password: 'user123', isAdmin: false },
+        { email: 'priya.sharma@email.com', password: 'user123', isAdmin: false },
+        { email: 'amit.patel@email.com', password: 'user123', isAdmin: false }
+      ];
+
+      // Check demo users first
+      const demoUser = demoUsers.find(u => u.email === email && u.password === password);
+      
       if (email === 'admin@smartutility.com' && password === 'admin123') {
         const adminUser = {
           id: 'admin',
@@ -51,7 +60,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setUser(adminUser);
         localStorage.setItem('userData', JSON.stringify(adminUser));
+        localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', 'true');
+        return true;
+      } else if (demoUser && !demoUser.isAdmin) {
+        // Handle demo users
+        const demoUserData = {
+          id: demoUser.email,
+          name: demoUser.email === 'rajesh.kumar@email.com' ? 'Rajesh Kumar' :
+                demoUser.email === 'priya.sharma@email.com' ? 'Priya Sharma' : 'Amit Patel',
+          email: demoUser.email,
+          mobile: demoUser.email === 'rajesh.kumar@email.com' ? '+91 9876543210' :
+                  demoUser.email === 'priya.sharma@email.com' ? '+91 9876543211' : '+91 9876543212',
+          dob: '1990-01-15',
+          area: 'sector-1',
+          water_meter_no: 'WAT' + Math.random().toString().substr(2, 6),
+          electricity_meter_no: 'ELE' + Math.random().toString().substr(2, 6),
+          created_at: new Date().toISOString()
+        };
+        setUser(demoUserData);
+        localStorage.setItem('userData', JSON.stringify(demoUserData));
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('isAdmin', 'false');
         return true;
       }
 
@@ -63,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { password, ...userWithoutPassword } = foundUser;
         setUser(userWithoutPassword);
         localStorage.setItem('userData', JSON.stringify(userWithoutPassword));
+        localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', 'false');
         return true;
       }
@@ -95,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(newUser);
       localStorage.setItem('userData', JSON.stringify(newUser));
+      localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', 'false');
       return true;
     } catch (error) {
@@ -106,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('userData');
+    localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
   };
 
