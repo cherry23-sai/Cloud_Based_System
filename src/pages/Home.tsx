@@ -24,13 +24,15 @@ const Home: React.FC = () => {
           <p className="text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto">
             Take control of your electricity and water usage with our cloud-based intelligent system
           </p>
-          <Link
-            to={localStorage.getItem('isLoggedIn') === 'true' ? '/services' : '/auth'}
-            className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-full hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            {localStorage.getItem('isLoggedIn') === 'true' ? 'Go to Services' : 'Get Started'}
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Link>
+          {localStorage.getItem('isLoggedIn') !== 'true' && (
+            <Link
+              to="/auth"
+              className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-full hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Get Started
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          )}
         </div>
       </div>
 
