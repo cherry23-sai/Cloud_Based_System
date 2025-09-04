@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { CreditCard, Calendar, MapPin, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { logTransaction } from '../../lib/activityLogger';
 
 const BillPayments: React.FC = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     billNo: '',
     lastDate: '',
@@ -28,6 +31,17 @@ const BillPayments: React.FC = () => {
     }
     
     await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Log transaction
+    if (user) {
+      logTransaction(user.id, user.name, {
+        billNo: formData.billNo,
+        amount: formData.amount,
+        paymentType: formData.paymentType,
+        serviceType: formData.billNo.toLowerCase().includes('ele') ? 'electricity' : 'water',
+        area: formData.area
+      });
+    }
     
     setIsProcessing(false);
     setPaymentSuccess(true);

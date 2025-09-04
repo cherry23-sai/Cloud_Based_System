@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Droplets, TrendingUp, Activity, Calendar, Eye } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { logActivity } from '../../lib/activityLogger';
 
 const TrackWater: React.FC = () => {
+  const { user } = useAuth();
   const [meterInfo, setMeterInfo] = useState({
     meterNo: '',
     name: ''
@@ -15,6 +18,17 @@ const TrackWater: React.FC = () => {
 
   const handleDisplay = () => {
     // Simulate fetching data
+    if (user) {
+      logActivity(
+        user.id,
+        user.name,
+        user.email,
+        'Water Reading Viewed',
+        `Viewed water meter reading for ${meterInfo.meterNo}`,
+        'meter_reading'
+      );
+    }
+    
     setCurrentReading({
       meterNo: meterInfo.meterNo,
       name: meterInfo.name,

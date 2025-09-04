@@ -3,6 +3,7 @@ import { Star, User, Calendar, Filter } from 'lucide-react';
 
 interface Review {
   id: number;
+  userId?: string;
   name: string;
   email: string;
   servicesUsed: string;
@@ -88,8 +89,25 @@ const Reviews: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate loading reviews
-    setReviews(sampleReviews);
+    // Load reviews from localStorage (user feedbacks) and combine with sample reviews
+    const userFeedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+    
+    const userReviews = userFeedbacks.map((feedback: any, index: number) => ({
+      id: 1000 + index,
+      userId: feedback.userId,
+      name: feedback.name,
+      email: feedback.email,
+      servicesUsed: feedback.servicesUsed,
+      performance: feedback.performance,
+      interfaceRating: feedback.interfaceRating,
+      overallFeedback: feedback.overallFeedback,
+      date: feedback.createdAt.split('T')[0],
+      verified: true
+    }));
+    
+    // Combine sample reviews with user reviews
+    const allReviews = [...sampleReviews, ...userReviews];
+    setReviews(allReviews);
   }, []);
 
   const filteredReviews = reviews.filter(review => {

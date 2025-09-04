@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
+import { logActivity } from '../lib/activityLogger';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -62,6 +63,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('userData', JSON.stringify(adminUser));
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', 'true');
+        
+        logActivity(
+          adminUser.id,
+          adminUser.name,
+          adminUser.email,
+          'Admin Login',
+          'Administrator logged into the system',
+          'login'
+        );
+        
         return true;
       } else if (demoUser && !demoUser.isAdmin) {
         // Handle demo users
@@ -82,6 +93,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('userData', JSON.stringify(demoUserData));
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', 'false');
+        
+        logActivity(
+          demoUserData.id,
+          demoUserData.name,
+          demoUserData.email,
+          'User Login',
+          'User logged into the system',
+          'login'
+        );
+        
         return true;
       }
 
@@ -95,6 +116,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('userData', JSON.stringify(userWithoutPassword));
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', 'false');
+        
+        logActivity(
+          userWithoutPassword.id,
+          userWithoutPassword.name,
+          userWithoutPassword.email,
+          'User Login',
+          'User logged into the system',
+          'login'
+        );
+        
         return true;
       }
       
@@ -128,6 +159,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('userData', JSON.stringify(newUser));
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', 'false');
+      
+      logActivity(
+        newUser.id,
+        newUser.name,
+        newUser.email,
+        'User Registration',
+        'New user registered to the platform',
+        'registration'
+      );
+      
       return true;
     } catch (error) {
       console.error('Registration error:', error);
@@ -156,6 +197,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           users[userIndex] = { ...users[userIndex], ...data };
           localStorage.setItem('registeredUsers', JSON.stringify(users));
         }
+        
+        logActivity(
+          user.id,
+          user.name,
+          user.email,
+          'Profile Update',
+          'User updated their profile information',
+          'profile'
+        );
       }
       return true;
     } catch (error) {

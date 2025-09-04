@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, Download, Calendar, CreditCard, Search, Eye, Printer } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getUserTransactions } from '../../lib/activityLogger';
 
 interface Invoice {
   id: string;
@@ -13,11 +15,31 @@ interface Invoice {
 }
 
 const InvoiceBills: React.FC = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState('All');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [userInvoices, setUserInvoices] = useState<Invoice[]>([]);
 
-  const invoices: Invoice[] = [
+  React.useEffect(() => {
+    if (user) {
+      const transactions = getUserTransactions(user.id);
+      const convertedInvoices = transactions.map((t, index) => ({
+        id: `INV-${new Date(t.timestamp).getFullYear()}-${String(index + 100).padStart(3, '0')}`,
+        date: t.timestamp.split('T')[0],
+        dueDate: new Date(new Date(t.timestamp).getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        service: t.serviceType.charAt(0).toUpperCase() + t.serviceType.slice(1) as 'Electricity' | 'Water',
+        amount: t.amount,
+        status: 'Paid' as const,
+        meterNo: t.serviceType === 'electricity' ? user.electricity_meter_no : user.water_meter_no,
+        units: t.serviceType === 'electricity' ? '136 kWh' : '566 L'
+      }));
+      setUserInvoices(convertedInvoices);
+    }
+  }, [user]);
+
+  // Sample invoices for demo
+  const sampleInvoices: Invoice[] = [
     {
       id: 'INV-2024-001',
       date: '2024-01-15',
@@ -60,7 +82,10 @@ const InvoiceBills: React.FC = () => {
     }
   ];
 
-  const filteredInvoices = invoices.filter(invoice => {
+  // Combine sample and user invoices
+  const allInvoices = [...sampleInvoices, ...userInvoices];
+
+  const filteredInvoices = allInvoices.filter(invoice => {
     const matchesSearch = invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          invoice.meterNo.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesService = selectedService === 'All' || invoice.service === selectedService;
@@ -221,7 +246,7 @@ const InvoiceBills: React.FC = () => {
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
                 <div className="text-center">
                   <FileText className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-blue-900">{invoices.length}</div>
+                  <div className="text-2xl font-bold text-blue-900">{allInvoices.length}</div>
                   <div className="text-blue-700 text-sm">Total Invoices</div>
                 </div>
               </div>
@@ -229,7 +254,7 @@ const InvoiceBills: React.FC = () => {
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
                 <div className="text-center">
                   <CreditCard className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-green-900">{invoices.filter(i => i.status === 'Paid').length}</div>
+                  <div className="text-2xl font-bold text-green-900">{allInvoices.filter(i => i.status === 'Paid').length}</div>
                   <div className="text-green-700 text-sm">Paid Invoices</div>
                 </div>
               </div>
@@ -237,7 +262,7 @@ const InvoiceBills: React.FC = () => {
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
                 <div className="text-center">
                   <Calendar className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-yellow-900">{invoices.filter(i => i.status === 'Pending').length}</div>
+                  <div className="text-2xl font-bold text-yellow-900">{allInvoices.filter(i => i.status === 'Pending').length}</div>
                   <div className="text-yellow-700 text-sm">Pending Bills</div>
                 </div>
               </div>
@@ -245,7 +270,9 @@ const InvoiceBills: React.FC = () => {
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
                 <div className="text-center">
                   <Download className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-purple-900">₹4,660</div>
+                  <div className="text-2xl font-bold text-purple-900">
+                    ₹{allInvoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace('₹', '').replace(',', '')), 0).toLocaleString('en-IN')}
+                  </div>
                   <div className="text-purple-700 text-sm">Total Amount</div>
                 </div>
               </div>

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Settings, Zap, Droplets, Bell, Clock, Mail, Phone, Save } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { logActivity } from '../../lib/activityLogger';
 
 const SettingLimit: React.FC = () => {
+  const { user } = useAuth();
   const [limits, setLimits] = useState({
     electricityMeterNo: '',
     electricityLimit: '',
@@ -25,6 +28,19 @@ const SettingLimit: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Log activity
+    if (user) {
+      logActivity(
+        user.id,
+        user.name,
+        user.email,
+        'Limit Settings Updated',
+        `Set electricity limit: ${limits.electricityLimit} kWh, water limit: ${limits.waterLimit} L`,
+        'limit_setting'
+      );
+    }
+    
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

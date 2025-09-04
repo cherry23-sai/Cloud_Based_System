@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Zap, TrendingUp, Activity, Calendar, Eye } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { logActivity } from '../../lib/activityLogger';
 
 const TrackElectricity: React.FC = () => {
+  const { user } = useAuth();
   const [meterInfo, setMeterInfo] = useState({
     meterNo: '',
     name: ''
@@ -15,6 +18,17 @@ const TrackElectricity: React.FC = () => {
 
   const handleDisplay = () => {
     // Simulate fetching data
+    if (user) {
+      logActivity(
+        user.id,
+        user.name,
+        user.email,
+        'Electricity Reading Viewed',
+        `Viewed electricity meter reading for ${meterInfo.meterNo}`,
+        'meter_reading'
+      );
+    }
+    
     setCurrentReading({
       meterNo: meterInfo.meterNo,
       name: meterInfo.name,

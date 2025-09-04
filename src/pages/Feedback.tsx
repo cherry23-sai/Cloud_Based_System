@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { MessageSquare, Star, Send, CheckCircle, Mail } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../lib/activityLogger';
 
 const Feedback: React.FC = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,11 +32,24 @@ const Feedback: React.FC = () => {
     const feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
     const newFeedback = {
       ...formData,
+      userId: user?.id || 'anonymous',
       createdAt: new Date().toISOString(),
       id: Date.now().toString()
     };
     feedbacks.push(newFeedback);
     localStorage.setItem('userFeedbacks', JSON.stringify(feedbacks));
+    
+    // Log activity
+    if (user) {
+      logActivity(
+        user.id,
+        user.name,
+        user.email,
+        'Feedback Submitted',
+        `Submitted feedback for ${formData.servicesUsed} with ${formData.interfaceRating}/5 rating`,
+        'feedback'
+      );
+    }
     
     // Show animation
     setShowAnimation(true);

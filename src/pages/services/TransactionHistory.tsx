@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { History, Download, Calendar, CreditCard, Search, Filter } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getUserTransactions } from '../../lib/activityLogger';
 
 interface Transaction {
   id: number;
@@ -11,11 +13,21 @@ interface Transaction {
 }
 
 const TransactionHistory: React.FC = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [sortBy, setSortBy] = useState('date');
+  const [userTransactions, setUserTransactions] = useState<any[]>([]);
 
-  const transactions: Transaction[] = [
+  React.useEffect(() => {
+    if (user) {
+      const transactions = getUserTransactions(user.id);
+      setUserTransactions(transactions);
+    }
+  }, [user]);
+
+  // Sample transactions for demo
+  const sampleTransactions: Transaction[] = [
     { id: 1, date: '2024-01-15', name: 'Electricity Bill', amount: '₹1,632', type: 'Electricity', status: 'Completed' },
     { id: 2, date: '2024-01-12', name: 'Water Bill', amount: '₹849', type: 'Water', status: 'Completed' },
     { id: 3, date: '2024-01-08', name: 'Electricity Bill', amount: '₹1,456', type: 'Electricity', status: 'Completed' },
@@ -26,7 +38,20 @@ const TransactionHistory: React.FC = () => {
     { id: 8, date: '2023-11-15', name: 'Water Bill', amount: '₹834', type: 'Water', status: 'Completed' }
   ];
 
-  const filteredTransactions = transactions
+  // Convert user transactions to display format
+  const convertedUserTransactions = userTransactions.map((t, index) => ({
+    id: 1000 + index,
+    date: t.timestamp.split('T')[0],
+    name: `${t.serviceType.charAt(0).toUpperCase() + t.serviceType.slice(1)} Bill`,
+    amount: t.amount,
+    type: t.serviceType.charAt(0).toUpperCase() + t.serviceType.slice(1) as 'Electricity' | 'Water',
+    status: t.status.charAt(0).toUpperCase() + t.status.slice(1) as 'Completed' | 'Pending' | 'Failed'
+  }));
+
+  // Combine sample and user transactions
+  const allTransactions = [...sampleTransactions, ...convertedUserTransactions];
+
+  const filteredTransactions = allTransactions
     .filter(transaction => {
       const matchesSearch = transaction.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterType === 'All' || transaction.type === filterType;
@@ -120,7 +145,12 @@ const TransactionHistory: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-green-600 text-sm font-medium">Total Paid</p>
-                    <p className="text-2xl font-bold text-green-900">₹9,473</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      ₹{allTransactions
+                        .filter(t => t.status === 'Completed')
+                        .reduce((sum, t) => sum + parseFloat(t.amount.replace('₹', '').replace(',', '')), 0)
+                        .toLocaleString('en-IN')}
+                    </p>
                     <p className="text-green-700 text-sm">This Year</p>
                   </div>
                   <CreditCard className="h-8 w-8 text-green-600" />
@@ -131,7 +161,7 @@ const TransactionHistory: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-blue-600 text-sm font-medium">Transactions</p>
-                    <p className="text-2xl font-bold text-blue-900">{transactions.length}</p>
+                    <p className="text-2xl font-bold text-blue-900">{allTransactions.length}</p>
                     <p className="text-blue-700 text-sm">Total Count</p>
                   </div>
                   <History className="h-8 w-8 text-blue-600" />
@@ -142,7 +172,9 @@ const TransactionHistory: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-purple-600 text-sm font-medium">Success Rate</p>
-                    <p className="text-2xl font-bold text-purple-900">95%</p>
+                    <p className="text-2xl font-bold text-purple-900">
+                      {Math.round((allTransactions.filter(t => t.status === 'Completed').length / allTransactions.length) * 100)}%
+                    </p>
                     <p className="text-purple-700 text-sm">Payment Success</p>
                   </div>
                   <Calendar className="h-8 w-8 text-purple-600" />
