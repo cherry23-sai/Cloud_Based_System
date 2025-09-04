@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, MessageSquare, Activity, Zap, Droplets, Star, TrendingUp } from 'lucide-react';
+import { Shield, Users, MessageSquare, Activity, Zap, Droplets, Star, TrendingUp, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getActivities, getTransactions, Activity as ActivityType } from '../lib/activityLogger';
 
 interface AdminStats {
   totalUsers: number;
@@ -17,6 +18,8 @@ const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [activities, setActivities] = useState<ActivityType[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalFeedbacks: 0,
@@ -36,9 +39,13 @@ const Admin: React.FC = () => {
     // Load users from localStorage
     const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const userFeedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+    const userActivities = getActivities();
+    const userTransactions = getTransactions();
     
     setUsers(registeredUsers);
     setFeedbacks(userFeedbacks);
+    setActivities(userActivities);
+    setTransactions(userTransactions);
 
     // Calculate stats
     const avgRating = userFeedbacks.length > 0 
@@ -102,14 +109,50 @@ const Admin: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
+        <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6 border border-red-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-600 text-sm font-medium">Total Usage</p>
-              <p className="text-3xl font-bold text-purple-900">{stats.totalUsage.electricity + stats.totalUsage.water}</p>
+              <p className="text-red-600 text-sm font-medium">Activities</p>
+              <p className="text-3xl font-bold text-red-900">{activities.length}</p>
             </div>
-            <Activity className="h-8 w-8 text-purple-600" />
+            <Activity className="h-8 w-8 text-red-600" />
           </div>
+        </div>
+      </div>
+
+      {/* Recent Activities */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Recent Activities</h3>
+        <div className="space-y-4 max-h-64 overflow-y-auto">
+          {activities.slice(0, 10).map((activity) => (
+            <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className={`p-2 rounded-full ${
+                activity.type === 'payment' ? 'bg-green-100' :
+                activity.type === 'feedback' ? 'bg-blue-100' :
+                activity.type === 'login' ? 'bg-purple-100' :
+                activity.type === 'registration' ? 'bg-yellow-100' :
+                'bg-gray-100'
+              }`}>
+                <Activity className={`h-4 w-4 ${
+                  activity.type === 'payment' ? 'text-green-600' :
+                  activity.type === 'feedback' ? 'text-blue-600' :
+                  activity.type === 'login' ? 'text-purple-600' :
+                  activity.type === 'registration' ? 'text-yellow-600' :
+                  'text-gray-600'
+                }`} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-900">{activity.userName}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(activity.timestamp).toLocaleString('en-IN')}
+                  </p>
+                </div>
+                <p className="text-sm text-gray-600">{activity.action}</p>
+                <p className="text-xs text-gray-500">{activity.details}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -282,6 +325,98 @@ const Admin: React.FC = () => {
     </div>
   );
 
+  const renderActivities = () => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-bold text-gray-900">User Activities</h3>
+      </div>
+      <div className="p-6">
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {activities.map((activity) => (
+            <div key={activity.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className={`p-2 rounded-full ${
+                activity.type === 'payment' ? 'bg-green-100' :
+                activity.type === 'feedback' ? 'bg-blue-100' :
+                activity.type === 'login' ? 'bg-purple-100' :
+                activity.type === 'registration' ? 'bg-yellow-100' :
+                'bg-gray-100'
+              }`}>
+                <Activity className={`h-5 w-5 ${
+                  activity.type === 'payment' ? 'text-green-600' :
+                  activity.type === 'feedback' ? 'text-blue-600' :
+                  activity.type === 'login' ? 'text-purple-600' :
+                  activity.type === 'registration' ? 'text-yellow-600' :
+                  'text-gray-600'
+                }`} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="font-semibold text-gray-900">{activity.userName}</h4>
+                  <span className="text-xs text-gray-500">
+                    {new Date(activity.timestamp).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-700 font-medium">{activity.action}</p>
+                <p className="text-sm text-gray-600">{activity.details}</p>
+                <p className="text-xs text-gray-500 mt-1">{activity.userEmail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTransactions = () => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-bold text-gray-900">All Transactions</h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill No</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Method</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {transactions.map((transaction, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.userName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{transaction.billNo}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    transaction.serviceType === 'electricity' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {transaction.serviceType.charAt(0).toUpperCase() + transaction.serviceType.slice(1)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.amount}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{transaction.paymentType}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {new Date(transaction.timestamp).toLocaleDateString('en-IN')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -301,7 +436,9 @@ const Admin: React.FC = () => {
                 { id: 'overview', label: 'Overview', icon: TrendingUp },
                 { id: 'users', label: 'Users', icon: Users },
                 { id: 'feedbacks', label: 'Feedbacks', icon: MessageSquare },
-                { id: 'usage', label: 'Usage Details', icon: Activity }
+                { id: 'usage', label: 'Usage Details', icon: Activity },
+                { id: 'activities', label: 'Activities', icon: Activity },
+                { id: 'transactions', label: 'Transactions', icon: CreditCard }
               ].map((tab) => {
                 const IconComponent = tab.icon;
                 return (
@@ -328,6 +465,8 @@ const Admin: React.FC = () => {
             {activeTab === 'users' && renderUsers()}
             {activeTab === 'feedbacks' && renderFeedbacks()}
             {activeTab === 'usage' && renderUsage()}
+            {activeTab === 'activities' && renderActivities()}
+            {activeTab === 'transactions' && renderTransactions()}
           </div>
         </div>
       </div>
