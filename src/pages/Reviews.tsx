@@ -18,6 +18,7 @@ const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [filterRating, setFilterRating] = useState('All');
   const [filterService, setFilterService] = useState('All');
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   const sampleReviews: Review[] = [
     {
@@ -145,23 +146,25 @@ const Reviews: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen ${isAdmin ? 'bg-gradient-to-br from-gray-50 to-blue-50 py-8' : 'bg-gradient-to-br from-yellow-50 to-orange-100 py-12'} px-4 sm:px-6 lg:px-8`}>
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-yellow-600 to-orange-700 px-8 py-6">
+          <div className={`${isAdmin ? 'bg-gradient-to-r from-gray-800 to-gray-900' : 'bg-gradient-to-r from-yellow-600 to-orange-700'} px-8 py-6`}>
             <h1 className="text-3xl font-bold text-white flex items-center">
               <Star className="mr-3 h-8 w-8" />
-              Customer Reviews
+              {isAdmin ? 'User Reviews & Feedback' : 'Customer Reviews'}
             </h1>
-            <p className="text-yellow-100 mt-2">See what our users are saying about SmartUtility</p>
+            <p className={`${isAdmin ? 'text-gray-300' : 'text-yellow-100'} mt-2`}>
+              {isAdmin ? 'Monitor user feedback and reviews' : 'See what our users are saying about SmartUtility'}
+            </p>
           </div>
 
           <div className="p-8">
             {/* Rating Overview */}
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-8 mb-8 border border-yellow-200">
+            <div className={`${isAdmin ? 'bg-gradient-to-r from-gray-50 to-blue-50 border-gray-200' : 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200'} rounded-2xl p-8 mb-8 border`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="text-center lg:text-left">
-                  <div className="text-6xl font-bold text-yellow-600 mb-2">{averageRating}</div>
+                  <div className={`text-6xl font-bold ${isAdmin ? 'text-blue-600' : 'text-yellow-600'} mb-2`}>{averageRating}</div>
                   <StarDisplay rating={Math.round(Number(averageRating))} size="h-6 w-6" />
                   <div className="text-gray-600 mt-2">Based on {reviews.length} reviews</div>
                 </div>
@@ -173,7 +176,7 @@ const Reviews: React.FC = () => {
                       <Star className="h-4 w-4 text-yellow-400 fill-current" />
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+                          className={`${isAdmin ? 'bg-blue-400' : 'bg-yellow-400'} h-2 rounded-full transition-all duration-300`}
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -194,7 +197,7 @@ const Reviews: React.FC = () => {
               <select
                 value={filterRating}
                 onChange={(e) => setFilterRating(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${isAdmin ? 'focus:ring-blue-500' : 'focus:ring-yellow-500'} focus:border-transparent`}
               >
                 <option value="All">All Ratings</option>
                 <option value="5">5 Stars</option>
@@ -205,7 +208,7 @@ const Reviews: React.FC = () => {
               <select
                 value={filterService}
                 onChange={(e) => setFilterService(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${isAdmin ? 'focus:ring-blue-500' : 'focus:ring-yellow-500'} focus:border-transparent`}
               >
                 <option value="All">All Services</option>
                 <option value="Bill Payments">Bill Payments</option>

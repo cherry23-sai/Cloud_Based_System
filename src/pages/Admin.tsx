@@ -15,7 +15,7 @@ interface AdminStats {
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('activities');
   const [users, setUsers] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [activities, setActivities] = useState<ActivityType[]>([]);
@@ -75,113 +75,6 @@ const Admin: React.FC = () => {
     );
   }
 
-  const renderOverview = () => (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-600 text-sm font-medium">Total Users</p>
-              <p className="text-3xl font-bold text-blue-900">{stats.totalUsers}</p>
-            </div>
-            <Users className="h-8 w-8 text-blue-600" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-600 text-sm font-medium">Total Feedbacks</p>
-              <p className="text-3xl font-bold text-green-900">{stats.totalFeedbacks}</p>
-            </div>
-            <MessageSquare className="h-8 w-8 text-green-600" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-yellow-600 text-sm font-medium">Avg Rating</p>
-              <p className="text-3xl font-bold text-yellow-900">{stats.avgRating}/5</p>
-            </div>
-            <Star className="h-8 w-8 text-yellow-600" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6 border border-red-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-red-600 text-sm font-medium">Activities</p>
-              <p className="text-3xl font-bold text-red-900">{activities.length}</p>
-            </div>
-            <Activity className="h-8 w-8 text-red-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activities */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">Recent Activities</h3>
-        <div className="space-y-4 max-h-64 overflow-y-auto">
-          {activities.slice(0, 10).map((activity) => (
-            <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-              <div className={`p-2 rounded-full ${
-                activity.type === 'payment' ? 'bg-green-100' :
-                activity.type === 'feedback' ? 'bg-blue-100' :
-                activity.type === 'login' ? 'bg-purple-100' :
-                activity.type === 'registration' ? 'bg-yellow-100' :
-                'bg-gray-100'
-              }`}>
-                <Activity className={`h-4 w-4 ${
-                  activity.type === 'payment' ? 'text-green-600' :
-                  activity.type === 'feedback' ? 'text-blue-600' :
-                  activity.type === 'login' ? 'text-purple-600' :
-                  activity.type === 'registration' ? 'text-yellow-600' :
-                  'text-gray-600'
-                }`} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-900">{activity.userName}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(activity.timestamp).toLocaleString('en-IN')}
-                  </p>
-                </div>
-                <p className="text-sm text-gray-600">{activity.action}</p>
-                <p className="text-xs text-gray-500">{activity.details}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Usage Overview */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">Usage Overview</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-600 font-medium">Total Electricity Usage</p>
-                <p className="text-2xl font-bold text-yellow-900">{stats.totalUsage.electricity} kWh</p>
-              </div>
-              <Zap className="h-8 w-8 text-yellow-600" />
-            </div>
-          </div>
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-600 font-medium">Total Water Usage</p>
-                <p className="text-2xl font-bold text-blue-900">{stats.totalUsage.water} L</p>
-              </div>
-              <Droplets className="h-8 w-8 text-blue-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   const renderUsers = () => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -272,58 +165,6 @@ const Admin: React.FC = () => {
     </div>
   );
 
-  const renderUsage = () => (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">User Meter Usage Details</h3>
-        <div className="grid grid-cols-1 gap-6">
-          {users.map((user, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900">{user.name}</h4>
-                  <p className="text-sm text-gray-600">{user.email}</p>
-                  <p className="text-sm text-gray-600">{user.area}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">Member since</p>
-                  <p className="text-sm font-medium">{new Date(user.created_at).toLocaleDateString('en-IN')}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium text-yellow-800">Electricity Usage</h5>
-                    <Zap className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div className="space-y-1 text-sm">
-                    <p><span className="text-gray-600">Meter No:</span> {user.electricityMeterNo}</p>
-                    <p><span className="text-gray-600">Current Reading:</span> 4,892 kWh</p>
-                    <p><span className="text-gray-600">Monthly Usage:</span> 136 kWh</p>
-                    <p><span className="text-gray-600">Estimated Bill:</span> ₹1,632</p>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium text-blue-800">Water Usage</h5>
-                    <Droplets className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="space-y-1 text-sm">
-                    <p><span className="text-gray-600">Meter No:</span> {user.waterMeterNo}</p>
-                    <p><span className="text-gray-600">Current Reading:</span> 12,456 L</p>
-                    <p><span className="text-gray-600">Monthly Usage:</span> 566 L</p>
-                    <p><span className="text-gray-600">Estimated Bill:</span> ₹849</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 
   const renderActivities = () => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -367,58 +208,9 @@ const Admin: React.FC = () => {
     </div>
   );
 
-  const renderTransactions = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-bold text-gray-900">All Transactions</h3>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill No</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Method</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((transaction, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.userName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{transaction.billNo}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    transaction.serviceType === 'electricity' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {transaction.serviceType.charAt(0).toUpperCase() + transaction.serviceType.slice(1)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{transaction.amount}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{transaction.paymentType}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {new Date(transaction.timestamp).toLocaleDateString('en-IN')}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-8 py-6">
@@ -433,12 +225,9 @@ const Admin: React.FC = () => {
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-8">
               {[
-                { id: 'overview', label: 'Overview', icon: TrendingUp },
+                { id: 'activities', label: 'User Activities', icon: Activity },
                 { id: 'users', label: 'Users', icon: Users },
                 { id: 'feedbacks', label: 'Feedbacks', icon: MessageSquare },
-                { id: 'usage', label: 'Usage Details', icon: Activity },
-                { id: 'activities', label: 'Activities', icon: Activity },
-                { id: 'transactions', label: 'Transactions', icon: CreditCard }
               ].map((tab) => {
                 const IconComponent = tab.icon;
                 return (
@@ -461,12 +250,9 @@ const Admin: React.FC = () => {
 
           {/* Tab Content */}
           <div className="p-8">
-            {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'activities' && renderActivities()}
             {activeTab === 'users' && renderUsers()}
             {activeTab === 'feedbacks' && renderFeedbacks()}
-            {activeTab === 'usage' && renderUsage()}
-            {activeTab === 'activities' && renderActivities()}
-            {activeTab === 'transactions' && renderTransactions()}
           </div>
         </div>
       </div>

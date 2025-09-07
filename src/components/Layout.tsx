@@ -35,6 +35,90 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     window.location.href = '/';
   };
 
+  // Admin Layout
+  if (isAdmin && user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Admin Navigation Bar */}
+        <nav className="bg-gray-800 shadow-lg sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <Shield className="h-8 w-8 text-blue-400 mr-2" />
+                <span className="text-xl font-bold text-white">SmartUtility Admin</span>
+              </div>
+              
+              <div className="hidden md:flex space-x-8">
+                <Link
+                  to="/admin"
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive('/admin') 
+                      ? 'text-blue-400 bg-gray-700' 
+                      : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                  }`}
+                >
+                  <Shield className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Link>
+                <Link
+                  to="/reviews"
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive('/reviews') 
+                      ? 'text-blue-400 bg-gray-700' 
+                      : 'text-gray-300 hover:text-blue-400 hover:bg-gray-700'
+                  }`}
+                >
+                  <Star className="h-4 w-4 mr-1" />
+                  User Reviews
+                </Link>
+              </div>
+
+              {/* Admin Profile Dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-full hover:bg-gray-600 transition-colors"
+                >
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <Shield className="h-5 w-5" />
+                  </div>
+                  <span className="hidden sm:block font-medium">Admin</span>
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Admin Main Content */}
+        <main className="flex-grow">
+          {children}
+        </main>
+
+        {/* Admin Footer */}
+        <footer className="bg-gray-800 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="text-center text-sm text-gray-400">
+              <p>&copy; 2024 SmartUtility Admin Panel. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Regular User Layout
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Navigation Bar */}
@@ -127,16 +211,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <User className="h-4 w-4 mr-2" />
                       Profile
                     </Link>
-                    {isAdmin && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setShowDropdown(false)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <Shield className="h-4 w-4 mr-2" />
-                        Admin Dashboard
-                      </Link>
-                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
