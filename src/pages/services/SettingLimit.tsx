@@ -87,6 +87,9 @@ const SettingLimit: React.FC = () => {
                       placeholder="Enter electricity meter number"
                       required
                     />
+                    <div className="mt-1 text-xs text-gray-500">
+                      Demo: ELE123456, ELE789012, ELE345678
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Limit (kWh)</label>
@@ -124,6 +127,9 @@ const SettingLimit: React.FC = () => {
                       placeholder="Enter water meter number"
                       required
                     />
+                    <div className="mt-1 text-xs text-gray-500">
+                      Demo: WAT123456, WAT789012, WAT345678
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Limit (Liters)</label>

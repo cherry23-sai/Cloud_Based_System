@@ -85,8 +85,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   demoUser.email === 'priya.sharma@email.com' ? '+91 9876543211' : '+91 9876543212',
           dob: '1990-01-15',
           area: 'sector-1',
-          water_meter_no: 'WAT' + Math.random().toString().substr(2, 6),
-          electricity_meter_no: 'ELE' + Math.random().toString().substr(2, 6),
+          water_meter_no: demoUser.email === 'rajesh.kumar@email.com' ? 'WAT123456' :
+                          demoUser.email === 'priya.sharma@email.com' ? 'WAT789012' : 'WAT345678',
+          electricity_meter_no: demoUser.email === 'rajesh.kumar@email.com' ? 'ELE123456' :
+                                demoUser.email === 'priya.sharma@email.com' ? 'ELE789012' : 'ELE345678',
           created_at: new Date().toISOString()
         };
         setUser(demoUserData);
