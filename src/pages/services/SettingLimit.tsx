@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Zap, Droplets, Bell, Clock, Mail, Phone, Save } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { logActivity } from '../../lib/activityLogger';
+import { sendLimitAlert } from '../../lib/notificationService';
 
 const SettingLimit: React.FC = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ const SettingLimit: React.FC = () => {
   });
 
   const [saved, setSaved] = useState(false);
+  const [sendingAlerts, setSendingAlerts] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -26,7 +28,7 @@ const SettingLimit: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate that user is using their assigned meter numbers
@@ -41,6 +43,8 @@ const SettingLimit: React.FC = () => {
       }
     }
     
+    setSendingAlerts(true);
+    
     // Log activity
     if (user) {
       logActivity(
@@ -53,6 +57,40 @@ const SettingLimit: React.FC = () => {
       );
     }
     
+    // Send alerts to user
+    if (user && (limits.notifyPhone || limits.notifyEmail)) {
+      try {
+        const alertPromises = [];
+        
+        if (limits.notifyPhone && user.mobile) {
+          alertPromises.push(
+            sendLimitAlert('sms', user.mobile, user.name, 'electricity', limits.electricityLimit)
+          );
+          if (limits.waterLimit) {
+            alertPromises.push(
+              sendLimitAlert('sms', user.mobile, user.name, 'water', limits.waterLimit)
+            );
+          }
+        }
+        
+        if (limits.notifyEmail && user.email) {
+          alertPromises.push(
+            sendLimitAlert('email', user.email, user.name, 'electricity', limits.electricityLimit)
+          );
+          if (limits.waterLimit) {
+            alertPromises.push(
+              sendLimitAlert('email', user.email, user.name, 'water', limits.waterLimit)
+            );
+          }
+        }
+        
+        await Promise.all(alertPromises);
+      } catch (error) {
+        console.error('Error sending alerts:', error);
+      }
+    }
+    
+    setSendingAlerts(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -245,10 +283,11 @@ const SettingLimit: React.FC = () => {
             <div className="mt-8 flex justify-center">
               <button
                 type="submit"
-                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-lg hover:from-green-700 hover:to-emerald-800 transition-all font-medium flex items-center"
+                disabled={sendingAlerts}
+                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-lg hover:from-green-700 hover:to-emerald-800 transition-all font-medium flex items-center disabled:opacity-50"
               >
                 <Save className="mr-2 h-5 w-5" />
-                Save Limit Settings
+                {sendingAlerts ? 'Saving & Sending Alerts...' : 'Save Limit Settings'}
               </button>
             </div>
           </form>

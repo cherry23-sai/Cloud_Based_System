@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MessageSquare, Star, Send, CheckCircle, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../lib/activityLogger';
+import { sendFeedbackConfirmation } from '../lib/notificationService';
 
 const Feedback: React.FC = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ const Feedback: React.FC = () => {
 
   const [submitted, setSubmitted] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,8 +56,23 @@ const Feedback: React.FC = () => {
     // Show animation
     setShowAnimation(true);
     
-    // Simulate sending email and processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Send confirmation email
+    setSendingEmail(true);
+    try {
+      await sendFeedbackConfirmation(
+        formData.name,
+        formData.email,
+        formData.servicesUsed,
+        formData.interfaceRating,
+        formData.overallFeedback
+      );
+    } catch (error) {
+      console.error('Error sending confirmation email:', error);
+    }
+    setSendingEmail(false);
+    
+    // Processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     setSubmitted(true);
     setShowAnimation(false);
@@ -236,7 +253,7 @@ const Feedback: React.FC = () => {
               {showAnimation ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Sending Feedback...
+                  {sendingEmail ? 'Sending Email...' : 'Processing...'}
                 </>
               ) : (
                 <>

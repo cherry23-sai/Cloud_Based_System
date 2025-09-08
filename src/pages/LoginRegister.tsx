@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Phone, User, Calendar, MapPin, Zap, Droplets, Eye, EyeOff, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { sendOTP } from '../lib/notificationService';
 
 const LoginRegister: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +11,8 @@ const LoginRegister: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [otpSent, setOtpSent] = useState({ mobile: false, email: false });
+  const [otpValues, setOtpValues] = useState({ mobile: '', email: '' });
+  const [sendingOtp, setSendingOtp] = useState({ mobile: false, email: false });
   
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -74,18 +77,34 @@ const LoginRegister: React.FC = () => {
     setIsLoading(false);
   };
 
-  const sendOtp = (type: 'mobile' | 'email') => {
-    // Simulate OTP sending
-    setOtpSent({ ...otpSent, [type]: true });
+  const sendOtp = async (type: 'mobile' | 'email') => {
+    setSendingOtp({ ...sendingOtp, [type]: true });
     
-    // Auto-fill OTP for demo
-    setTimeout(() => {
-      if (type === 'mobile') {
-        setFormData({ ...formData, mobileOtp: '123456' });
+    const contact = type === 'mobile' ? formData.mobile : formData.email;
+    const otpType = type === 'mobile' ? 'sms' : 'email';
+    
+    try {
+      const result = await sendOTP(otpType, contact);
+      
+      if (result.success) {
+        setOtpSent({ ...otpSent, [type]: true });
+        // Store OTP for validation (in production, this would be server-side)
+        setOtpValues({ ...otpValues, [type]: result.otp || '' });
+        
+        // Show success message
+        alert(`OTP sent to your ${type === 'mobile' ? 'phone number' : 'email address'}`);
       } else {
-        setFormData({ ...formData, emailOtp: '654321' });
+        alert(`Failed to send OTP: ${result.message}`);
       }
-    }, 1000);
+    } catch (error) {
+      alert('Failed to send OTP. Please try again.');
+    } finally {
+      setSendingOtp({ ...sendingOtp, [type]: false });
+    }
+  };
+
+  const validateOtp = (type: 'mobile' | 'email', enteredOtp: string): boolean => {
+    return enteredOtp === otpValues[type];
   };
 
   const nextStep = () => setStep(step + 1);
@@ -205,11 +224,15 @@ const LoginRegister: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => sendOtp('mobile')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm"
+                  disabled={!formData.mobile || sendingOtp.mobile}
+                  className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
                 >
-                  {otpSent.mobile ? 'Sent ✓' : 'Send OTP'}
+                  {sendingOtp.mobile ? 'Sending...' : otpSent.mobile ? 'Sent ✓' : 'Send OTP'}
                 </button>
               </div>
+              {otpSent.mobile && (
+                <p className="text-xs text-green-600 mt-1">OTP sent to your mobile number</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
@@ -237,11 +260,15 @@ const LoginRegister: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => sendOtp('email')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm"
+                  disabled={!formData.email || sendingOtp.email}
+                  className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
                 >
-                  {otpSent.email ? 'Sent ✓' : 'Send OTP'}
+                  {sendingOtp.email ? 'Sending...' : otpSent.email ? 'Sent ✓' : 'Send OTP'}
                 </button>
               </div>
+              {otpSent.email && (
+                <p className="text-xs text-green-600 mt-1">OTP sent to your email address</p>
+              )}
             </div>
             <div className="flex space-x-4">
               <button
@@ -255,7 +282,14 @@ const LoginRegister: React.FC = () => {
                 type="button"
                 onClick={nextStep}
                 className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                disabled={!formData.mobile || !formData.email || !formData.mobileOtp || !formData.emailOtp}
+                disabled={
+                  !formData.mobile || 
+                  !formData.email || 
+                  !formData.mobileOtp || 
+                  !formData.emailOtp ||
+                  !validateOtp('mobile', formData.mobileOtp) ||
+                  !validateOtp('email', formData.emailOtp)
+                }
               >
                 Continue to Meter Information
               </button>
