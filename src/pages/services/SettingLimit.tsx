@@ -29,6 +29,18 @@ const SettingLimit: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate that user is using their assigned meter numbers
+    if (user) {
+      if (limits.electricityMeterNo !== user.electricity_meter_no) {
+        alert('Please use your assigned electricity meter number only.');
+        return;
+      }
+      if (limits.waterMeterNo !== user.water_meter_no) {
+        alert('Please use your assigned water meter number only.');
+        return;
+      }
+    }
+    
     // Log activity
     if (user) {
       logActivity(
@@ -87,9 +99,11 @@ const SettingLimit: React.FC = () => {
                       placeholder="Enter electricity meter number"
                       required
                     />
-                    <div className="mt-1 text-xs text-gray-500">
-                      Demo: ELE123456, ELE789012, ELE345678
-                    </div>
+                    {user && (
+                      <div className="mt-1 text-xs text-gray-500">
+                        Your meter: {user.electricity_meter_no}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Limit (kWh)</label>
@@ -127,9 +141,11 @@ const SettingLimit: React.FC = () => {
                       placeholder="Enter water meter number"
                       required
                     />
-                    <div className="mt-1 text-xs text-gray-500">
-                      Demo: WAT123456, WAT789012, WAT345678
-                    </div>
+                    {user && (
+                      <div className="mt-1 text-xs text-gray-500">
+                        Your meter: {user.water_meter_no}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Limit (Liters)</label>

@@ -24,6 +24,13 @@ const BillPayments: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
     
+    // Validate that user is using their assigned meter numbers
+    if (user && formData.billNo !== user.electricity_meter_no && formData.billNo !== user.water_meter_no) {
+      setError('Please use your assigned meter number only.');
+      setIsProcessing(false);
+      return;
+    }
+    
     // Simulate payment processing with validation
     if (!formData.billNo || !formData.amount || !formData.paymentType) {
       setIsProcessing(false);
@@ -102,11 +109,13 @@ const BillPayments: React.FC = () => {
                   required
                 />
               </div>
-              <div className="mt-2 text-sm text-gray-600">
-                <p className="font-medium">Demo Bill Numbers:</p>
-                <p>• ELE123456, ELE789012, ELE345678 (Electricity)</p>
-                <p>• WAT123456, WAT789012, WAT345678 (Water)</p>
-              </div>
+              {user && (
+                <div className="mt-2 text-sm text-gray-600">
+                  <p className="font-medium">Your Meter Numbers:</p>
+                  <p>• {user.electricity_meter_no} (Electricity)</p>
+                  <p>• {user.water_meter_no} (Water)</p>
+                </div>
+              )}
             </div>
 
             <div>

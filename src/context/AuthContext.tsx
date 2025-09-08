@@ -76,6 +76,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       } else if (demoUser && !demoUser.isAdmin) {
         // Handle demo users
+        const generateMeterNumbers = (email: string) => {
+          const userHash = email.split('@')[0].slice(-3);
+          return {
+            electricity: `ELE${userHash}456`,
+            water: `WAT${userHash}456`
+          };
+        };
+        
+        const meters = generateMeterNumbers(demoUser.email);
         const demoUserData = {
           id: demoUser.email,
           name: demoUser.email === 'rajesh.kumar@email.com' ? 'Rajesh Kumar' :
@@ -85,10 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   demoUser.email === 'priya.sharma@email.com' ? '+91 9876543211' : '+91 9876543212',
           dob: '1990-01-15',
           area: 'sector-1',
-          water_meter_no: demoUser.email === 'rajesh.kumar@email.com' ? 'WAT123456' :
-                          demoUser.email === 'priya.sharma@email.com' ? 'WAT789012' : 'WAT345678',
-          electricity_meter_no: demoUser.email === 'rajesh.kumar@email.com' ? 'ELE123456' :
-                                demoUser.email === 'priya.sharma@email.com' ? 'ELE789012' : 'ELE345678',
+          water_meter_no: meters.water,
+          electricity_meter_no: meters.electricity,
           created_at: new Date().toISOString()
         };
         setUser(demoUserData);
@@ -140,6 +147,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (userData: any): Promise<boolean> => {
     try {
+      // Generate unique meter numbers
+      const timestamp = Date.now().toString().slice(-6);
+      const electricityMeter = userData.electricityMeterNo || `ELE${timestamp}`;
+      const waterMeter = userData.waterMeterNo || `WAT${timestamp}`;
+      
       const newUser: UserProfile = {
         id: Date.now().toString(),
         name: userData.name,
@@ -147,8 +159,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         mobile: userData.mobile,
         dob: userData.dob,
         area: userData.area,
-        water_meter_no: userData.waterMeterNo,
-        electricity_meter_no: userData.electricityMeterNo,
+        water_meter_no: waterMeter,
+        electricity_meter_no: electricityMeter,
         created_at: new Date().toISOString()
       };
 

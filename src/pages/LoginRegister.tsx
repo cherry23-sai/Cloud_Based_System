@@ -91,6 +91,24 @@ const LoginRegister: React.FC = () => {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
+  const generateMeterNumbers = () => {
+    const timestamp = Date.now().toString().slice(-6);
+    const electricityMeter = `ELE${timestamp}`;
+    const waterMeter = `WAT${timestamp}`;
+    
+    setFormData({
+      ...formData,
+      electricityMeterNo: electricityMeter,
+      waterMeterNo: waterMeter
+    });
+  };
+
+  React.useEffect(() => {
+    if (step === 3 && !formData.electricityMeterNo && !formData.waterMeterNo) {
+      generateMeterNumbers();
+    }
+  }, [step]);
+
   const renderRegistrationStep = () => {
     switch (step) {
       case 1:
@@ -259,10 +277,12 @@ const LoginRegister: React.FC = () => {
                   value={formData.waterMeterNo}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter water meter number"
+                  placeholder="Auto-generated: WAT######"
+                  readOnly
                   required
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">Water meter number will be auto-generated</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Electricity Meter Number</label>
@@ -274,10 +294,12 @@ const LoginRegister: React.FC = () => {
                   value={formData.electricityMeterNo}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter electricity meter number"
+                  placeholder="Auto-generated: ELE######"
+                  readOnly
                   required
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">Electricity meter number will be auto-generated</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>

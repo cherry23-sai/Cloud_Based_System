@@ -17,6 +17,12 @@ const TrackElectricity: React.FC = () => {
   };
 
   const handleDisplay = () => {
+    // Validate that user is using their assigned meter number
+    if (user && meterInfo.meterNo !== user.electricity_meter_no) {
+      alert('Please use your assigned electricity meter number only.');
+      return;
+    }
+    
     // Simulate fetching data
     if (user) {
       logActivity(
@@ -72,12 +78,12 @@ const TrackElectricity: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                       placeholder="Enter electricity meter number"
                     />
-                    <div className="mt-2 text-sm text-gray-600">
-                      <p className="font-medium">Demo Meter Numbers:</p>
-                      <p>• ELE123456 (Rajesh Kumar)</p>
-                      <p>• ELE789012 (Priya Sharma)</p>
-                      <p>• ELE345678 (Amit Patel)</p>
-                    </div>
+                    {user && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        <p className="font-medium">Your Electricity Meter:</p>
+                        <p>• {user.electricity_meter_no}</p>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Consumer Name</label>
