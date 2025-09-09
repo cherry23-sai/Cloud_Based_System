@@ -31,7 +31,6 @@ const LoginRegister: React.FC = () => {
     waterMeterNo: '',
     electricityMeterNo: '',
     password: '',
-    mobileOtp: '',
     emailOtp: ''
   });
 
@@ -212,29 +211,7 @@ const LoginRegister: React.FC = () => {
                   required
                 />
               </div>
-              <div className="flex mt-2">
-                <input
-                  type="text"
-                  name="mobileOtp"
-                  value={formData.mobileOtp}
-                  onChange={handleInputChange}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter OTP"
-                />
-                <button
-                  type="button"
-                  onClick={() => sendOtp('mobile')}
-                  disabled={!formData.mobile || sendingOtp.mobile}
-                  className="px-4 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
-                >
-                  {sendingOtp.mobile ? 'Sending...' : otpSent.mobile ? 'Sent ✓' : 'Send OTP'}
-                </button>
-              </div>
-              {otpSent.mobile && (
-                <p className="text-xs text-green-600 mt-1">
-                  Demo OTP sent to your mobile number. Use the generated OTP: {otpValues.mobile}
-                </p>
-              )}
+              <p className="text-xs text-gray-500 mt-1">Mobile number will be used for SMS notifications</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
@@ -289,9 +266,7 @@ const LoginRegister: React.FC = () => {
                 disabled={
                   !formData.mobile || 
                   !formData.email || 
-                  !formData.mobileOtp || 
                   !formData.emailOtp ||
-                  !validateOtp('mobile', formData.mobileOtp) ||
                   !validateOtp('email', formData.emailOtp)
                 }
               >
