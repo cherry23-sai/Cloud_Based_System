@@ -124,7 +124,7 @@ const Feedback: React.FC = () => {
           <div className="bg-green-50 rounded-lg p-4 mb-6">
             <div className="flex items-center justify-center text-green-700">
               <Mail className="h-5 w-5 mr-2" />
-              <span className="text-sm">A thank-you email has been sent to {formData.email}</span>
+             <span className="text-sm">A demo thank-you email confirmation has been sent to {formData.email}</span>
             </div>
           </div>
           <p className="text-gray-600 mb-6">

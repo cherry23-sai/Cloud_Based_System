@@ -231,7 +231,9 @@ const LoginRegister: React.FC = () => {
                 </button>
               </div>
               {otpSent.mobile && (
-                <p className="text-xs text-green-600 mt-1">OTP sent to your mobile number</p>
+                <p className="text-xs text-green-600 mt-1">
+                  Demo OTP sent to your mobile number. Use the generated OTP: {otpValues.mobile}
+                </p>
               )}
             </div>
             <div>
@@ -267,7 +269,9 @@ const LoginRegister: React.FC = () => {
                 </button>
               </div>
               {otpSent.email && (
-                <p className="text-xs text-green-600 mt-1">OTP sent to your email address</p>
+               <p className="text-xs text-green-600 mt-1">
+                 Demo OTP sent to your email address. Use the generated OTP: {otpValues.email}
+               </p>
               )}
             </div>
             <div className="flex space-x-4">

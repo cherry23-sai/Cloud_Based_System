@@ -92,7 +92,14 @@ const SettingLimit: React.FC = () => {
     
     setSendingAlerts(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    
+    // Show success message with alert details
+    setTimeout(() => {
+      setSaved(false);
+      if (limits.notifyPhone || limits.notifyEmail) {
+        alert(`Limit settings saved successfully!\n\nAlerts sent to:\n${limits.notifyPhone && user?.mobile ? `• SMS: ${user.mobile}\n` : ''}${limits.notifyEmail && user?.email ? `• Email: ${user.email}` : ''}`);
+      }
+    }, 3000);
   };
 
   return (
