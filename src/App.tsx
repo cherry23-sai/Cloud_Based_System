@@ -37,7 +37,7 @@ function App() {
             <Route path="/services/invoice-bills" element={<AuthGuard><InvoiceBills /></AuthGuard>} />
             <Route path="/feedback" element={<AuthGuard><Feedback /></AuthGuard>} />
             <Route path="/reviews" element={<Reviews />} />
-            <Route path="/about" element={<AuthGuard><About /></AuthGuard>} />
+            <Route path="/about" element={<About />} />
           </Routes>
         </Layout>
       </Router>

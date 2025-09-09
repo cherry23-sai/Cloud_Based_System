@@ -142,28 +142,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Home className="h-4 w-4 mr-1" />
                 Home
               </Link>
-              <Link
-                to="/services"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/services') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-                }`}
-              >
-                <Settings className="h-4 w-4 mr-1" />
-                Services
-              </Link>
-              <Link
-                to="/feedback"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/feedback') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-                }`}
-              >
-                <MessageSquare className="h-4 w-4 mr-1" />
-                Feedback
-              </Link>
+              {user && (
+                <>
+                  <Link
+                    to="/services"
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive('/services') 
+                        ? 'text-blue-600 bg-blue-50' 
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Settings className="h-4 w-4 mr-1" />
+                    Services
+                  </Link>
+                  <Link
+                    to="/feedback"
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive('/feedback') 
+                        ? 'text-blue-600 bg-blue-50' 
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Feedback
+                  </Link>
+                </>
+              )}
               <Link
                 to="/reviews"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -221,6 +225,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Login/Register Button for Non-logged Users */}
+            {!user && (
+              <Link
+                to="/auth"
+                className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors font-medium"
+              >
+                Login / Register
+              </Link>
             )}
           </div>
         </div>
