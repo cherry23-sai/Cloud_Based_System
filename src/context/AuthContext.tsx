@@ -147,11 +147,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (userData: any): Promise<boolean> => {
     try {
-      // Generate unique meter numbers
-      const timestamp = Date.now().toString().slice(-6);
-      const electricityMeter = userData.electricityMeterNo || `ELE${timestamp}`;
-      const waterMeter = userData.waterMeterNo || `WAT${timestamp}`;
-      
       const newUser: UserProfile = {
         id: Date.now().toString(),
         name: userData.name,
@@ -159,8 +154,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         mobile: userData.mobile,
         dob: userData.dob,
         area: userData.area,
-        water_meter_no: waterMeter,
-        electricity_meter_no: electricityMeter,
+        water_meter_no: userData.waterMeterNo,
+        electricity_meter_no: userData.electricityMeterNo,
         created_at: new Date().toISOString()
       };
 

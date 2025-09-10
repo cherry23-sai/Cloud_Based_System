@@ -164,18 +164,6 @@ const LoginRegister: React.FC = () => {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const generateMeterNumbers = () => {
-    const timestamp = Date.now().toString().slice(-6);
-    const electricityMeter = `ELE${timestamp}`;
-    const waterMeter = `WAT${timestamp}`;
-    
-    setFormData({
-      ...formData,
-      electricityMeterNo: electricityMeter,
-      waterMeterNo: waterMeter
-    });
-  };
-
   React.useEffect(() => {
     if (step === 3 && !formData.electricityMeterNo && !formData.waterMeterNo) {
       generateMeterNumbers();
