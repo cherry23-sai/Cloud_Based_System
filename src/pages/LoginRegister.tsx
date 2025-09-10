@@ -40,7 +40,32 @@ const LoginRegister: React.FC = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Validate meter number format
+    if (name === 'electricityMeterNo' || name === 'waterMeterNo') {
+      const prefix = name === 'electricityMeterNo' ? 'ELE' : 'WAT';
+      let formattedValue = value.toUpperCase();
+      
+      // Ensure it starts with correct prefix
+      if (!formattedValue.startsWith(prefix)) {
+        if (formattedValue.length <= 3) {
+          formattedValue = prefix.substring(0, formattedValue.length);
+        } else {
+          formattedValue = prefix + formattedValue.substring(3);
+        }
+      }
+      
+      // Only allow numbers after prefix
+      if (formattedValue.length > 3) {
+        const numbers = formattedValue.substring(3).replace(/\D/g, '');
+        formattedValue = prefix + numbers.substring(0, 6);
+      }
+      
+      setFormData({ ...formData, [name]: formattedValue });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
     setError('');
   };
 
@@ -62,6 +87,36 @@ const LoginRegister: React.FC = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate meter number formats
+    const electricityPattern = /^ELE\d{6}$/;
+    const waterPattern = /^WAT\d{6}$/;
+    
+    if (!electricityPattern.test(formData.electricityMeterNo)) {
+      setError('Electricity meter number must be in format ELE######');
+      return;
+    }
+    
+    if (!waterPattern.test(formData.waterMeterNo)) {
+      setError('Water meter number must be in format WAT######');
+      return;
+    }
+    
+    // Check if meter numbers are already taken
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const electricityExists = users.some((u: any) => u.electricity_meter_no === formData.electricityMeterNo);
+    const waterExists = users.some((u: any) => u.water_meter_no === formData.waterMeterNo);
+    
+    if (electricityExists) {
+      setError('This electricity meter number is already registered');
+      return;
+    }
+    
+    if (waterExists) {
+      setError('This water meter number is already registered');
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
 
@@ -280,6 +335,15 @@ const LoginRegister: React.FC = () => {
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 text-center mb-6">Meter Information</h3>
+            
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <h4 className="font-medium text-blue-900 mb-2">Meter Number Format:</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• <strong>Electricity:</strong> ELE followed by 6 digits (e.g., ELE123456)</li>
+                <li>• <strong>Water:</strong> WAT followed by 6 digits (e.g., WAT789012)</li>
+              </ul>
+            </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Water Meter Number</label>
               <div className="relative">
@@ -290,12 +354,12 @@ const LoginRegister: React.FC = () => {
                   value={formData.waterMeterNo}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Auto-generated: WAT######"
-                  readOnly
+                  placeholder="Enter water meter number (WAT######)"
+                  maxLength={9}
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Water meter number will be auto-generated</p>
+              <p className="text-xs text-gray-500 mt-1">Format: WAT followed by 6 digits</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Electricity Meter Number</label>
@@ -307,12 +371,12 @@ const LoginRegister: React.FC = () => {
                   value={formData.electricityMeterNo}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Auto-generated: ELE######"
-                  readOnly
+                  placeholder="Enter electricity meter number (ELE######)"
+                  maxLength={9}
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Electricity meter number will be auto-generated</p>
+              <p className="text-xs text-gray-500 mt-1">Format: ELE followed by 6 digits</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
@@ -345,7 +409,14 @@ const LoginRegister: React.FC = () => {
               </button>
               <button
                 type="submit"
-                disabled={isLoading || !formData.waterMeterNo || !formData.electricityMeterNo || !formData.password}
+                disabled={
+                  isLoading || 
+                  !formData.waterMeterNo || 
+                  !formData.electricityMeterNo || 
+                  !formData.password ||
+                  !/^ELE\d{6}$/.test(formData.electricityMeterNo) ||
+                  !/^WAT\d{6}$/.test(formData.waterMeterNo)
+                }
                 className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center"
               >
                 {isLoading ? (
